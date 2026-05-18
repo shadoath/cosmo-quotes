@@ -191,13 +191,14 @@ select{-webkit-appearance:none;appearance:none;background-image:url("data:image/
 .overflow-x{overflow-x:auto}
 @media(max-width:900px){.builder-grid{grid-template-columns:1fr}.qpanel{position:static}.settings-layout{grid-template-columns:1fr}.settings-sidebar{display:flex;overflow-x:auto}.settings-sidebar button{border-bottom:none;border-right:1px solid var(--line-soft);white-space:nowrap}}
 @media(max-width:600px){#topbar{padding:0 12px}.nav-btn{padding:6px 10px;font-size:.78rem}#main{padding:16px 12px}.form-row{grid-template-columns:1fr}}
+@page{margin:0}
 @media print{
   *{scrollbar-width:none !important;-ms-overflow-style:none !important}
   *::-webkit-scrollbar{display:none !important}
   body>*:not(#print-overlay){display:none !important}
   #print-overlay{display:block !important;position:static;overflow:visible;background:#fff}
   #print-close{display:none !important}
-  #print-doc{max-width:100%;padding:0;margin:0}
+  #print-doc{max-width:100%;padding:12mm 14mm;margin:0;box-sizing:border-box}
 }
 </style>
 </head>
