@@ -46,23 +46,27 @@ textarea{resize:vertical;min-height:80px}
 .svc-card .svc-name{font-weight:700;font-size:.88rem;margin-bottom:3px;padding-right:20px}
 .svc-card .svc-rate{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--amber-dark);font-weight:500}
 .svc-card .svc-desc{font-size:.75rem;color:var(--muted);margin-top:3px}
-.line-table{width:100%;border-collapse:collapse}
-.line-table th{font-family:'Oswald',sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
-.line-table td{padding:8px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
-.line-table tr:last-child td{border-bottom:none}
+.line-block{border:1px solid var(--line);border-radius:9px;padding:12px 14px;background:#fff;margin-bottom:8px}
+.line-block:last-child{margin-bottom:0}
+.line-main{display:grid;grid-template-columns:1fr 90px 80px 28px;gap:10px;align-items:center}
 .line-name{font-weight:600;font-size:.88rem}
 .line-desc{font-size:.75rem;color:var(--muted)}
-.line-amt{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.9rem;color:var(--ink)}
-.line-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:2px 6px;border-radius:4px;transition:all .15s}
+.sqft-input{font-family:'JetBrains Mono',monospace;font-size:.88rem;padding:6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;width:100%;background:var(--paper)}
+.sqft-input:focus{outline:none;border-color:var(--amber);background:#fff}
+.line-amt{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.9rem;color:var(--ink);text-align:right}
+.line-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;padding:2px 6px;border-radius:4px;transition:all .15s;text-align:center}
 .line-remove:hover{background:var(--red-bg);color:var(--red)}
 .empty-lines{border:2px dashed var(--line);border-radius:8px;padding:32px;text-align:center;color:var(--muted);font-size:.88rem}
-.addon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
-.addon-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;transition:all .15s;background:#fff}
-.addon-item:hover{border-color:var(--amber)}
-.addon-item.selected{border-color:var(--amber);background:var(--cream)}
-.addon-item input[type=checkbox]{margin-top:2px;accent-color:var(--amber);width:15px;height:15px;flex-shrink:0}
-.addon-item label{font-family:'DM Sans',sans-serif;font-weight:600;font-size:.83rem;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--ink)}
-.addon-rate{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-top:1px}
+.line-addons{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}
+.line-addons-label{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.line-addons-grid{display:flex;flex-wrap:wrap;gap:6px}
+.addon-check-item{display:flex;align-items:center;gap:6px;padding:5px 9px;border:1.5px solid var(--line);border-radius:6px;cursor:pointer;background:var(--paper);transition:all .15s;white-space:nowrap}
+.addon-check-item:hover{border-color:var(--amber-dark)}
+.addon-check-item.checked{border-color:var(--amber);background:var(--cream)}
+.addon-check-item input[type=checkbox]{accent-color:var(--amber-dark);width:13px;height:13px;flex-shrink:0;cursor:pointer}
+.addon-check-item .aci-name{font-size:.78rem;font-weight:500;color:var(--ink)}
+.addon-check-item .aci-rate{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)}
+.addon-check-item .aci-amt{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;color:var(--amber-dark);min-width:36px;text-align:right}
 .qpanel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:sticky;top:84px}
 .qpanel-head{background:var(--ink);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
 .qpanel-head .qp-label{font-family:'Oswald',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.1em;color:rgba(255,255,255,.7);text-transform:uppercase}
@@ -154,7 +158,8 @@ textarea{resize:vertical;min-height:80px}
 .pin-error{color:var(--red);font-size:.82rem;margin-top:12px;min-height:18px}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 .shake{animation:shake .4s ease}
-#print-overlay{display:none;position:fixed;inset:0;background:#fff;z-index:500;overflow-y:auto}
+#print-overlay{display:none;position:fixed;inset:0;background:#fff;z-index:500;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}
+#print-overlay::-webkit-scrollbar{display:none}
 #print-close{position:fixed;top:20px;right:20px;z-index:501}
 #print-doc{max-width:800px;margin:40px auto;padding:40px;font-family:'DM Sans',sans-serif}
 .print-lh{display:flex;align-items:center;gap:20px;margin-bottom:20px;padding-bottom:20px;border-bottom:3px solid var(--amber)}
@@ -186,7 +191,14 @@ select{-webkit-appearance:none;appearance:none;background-image:url("data:image/
 .overflow-x{overflow-x:auto}
 @media(max-width:900px){.builder-grid{grid-template-columns:1fr}.qpanel{position:static}.settings-layout{grid-template-columns:1fr}.settings-sidebar{display:flex;overflow-x:auto}.settings-sidebar button{border-bottom:none;border-right:1px solid var(--line-soft);white-space:nowrap}}
 @media(max-width:600px){#topbar{padding:0 12px}.nav-btn{padding:6px 10px;font-size:.78rem}#main{padding:16px 12px}.form-row{grid-template-columns:1fr}}
-@media print{body>*:not(#print-overlay){display:none !important}#print-overlay{display:block !important}#print-close{display:none !important}}
+@media print{
+  *{scrollbar-width:none !important;-ms-overflow-style:none !important}
+  *::-webkit-scrollbar{display:none !important}
+  body>*:not(#print-overlay){display:none !important}
+  #print-overlay{display:block !important;position:static;overflow:visible;background:#fff}
+  #print-close{display:none !important}
+  #print-doc{max-width:100%;padding:0;margin:0}
+}
 </style>
 </head>
 <body>
@@ -235,10 +247,6 @@ select{-webkit-appearance:none;appearance:none;background-image:url("data:image/
           <div class="card-body">
             <div id="line-items-body"></div>
           </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div class="card-accent"></div><h3>Add-ons</h3></div>
-          <div class="card-body"><div class="addon-grid" id="addon-grid"></div></div>
         </div>
         <div class="card">
           <div class="card-head"><div class="card-accent"></div><h3>Notes</h3></div>
@@ -534,7 +542,7 @@ function newQuote(){
   document.getElementById('cl-email').value='';
   document.getElementById('quote-notes').value='';
   document.getElementById('discount-input').value='0';
-  renderServiceGrid();renderAddonGrid();renderLineItems();renderQuotePanel();
+  renderServiceGrid();renderLineItems();renderQuotePanel();
 }
 
 function renderServiceGrid(){
@@ -552,9 +560,11 @@ function toggleService(id){
   if(builderState.selected[id]){
     delete builderState.selected[id];
     delete builderState.sqfts[id];
+    delete builderState.addons[id];
   } else {
     builderState.selected[id]=true;
     builderState.sqfts[id]=builderState.sqfts[id]||0;
+    builderState.addons[id]=builderState.addons[id]||{};
   }
   renderServiceGrid();renderLineItems();renderQuotePanel();
 }
@@ -566,43 +576,68 @@ function renderLineItems(){
     body.innerHTML='<div class="empty-lines">Select services above to add line items</div>';
     return;
   }
-  body.innerHTML=`<div class="overflow-x"><table class="line-table">
-    <thead><tr><th>Service</th><th>Sqft</th><th>Amount</th><th></th></tr></thead>
-    <tbody>${ids.map(id=>{
-      const s=CFG.services.find(x=>x.id===id);
-      if(!s)return'';
-      const sqft=builderState.sqfts[id]||0;
-      const amt=sqft*s.rate;
-      return `<tr>
-        <td><div class="line-name">${s.name}</div><div class="line-desc">${s.desc}</div></td>
-        <td><input type="number" min="0" step="1" value="${sqft}" style="max-width:90px" oninput="updateSqft('${id}',this.value)"></td>
-        <td><span class="line-amt">${fmt(amt)}</span></td>
-        <td><button class="line-remove" onclick="toggleService('${id}')">×</button></td>
-      </tr>`;
-    }).join('')}</tbody></table></div>`;
+  body.innerHTML=ids.map(id=>{
+    const s=CFG.services.find(x=>x.id===id);
+    if(!s)return'';
+    const sqft=builderState.sqfts[id]||0;
+    const amt=sqft*s.rate;
+    const svcAddons=builderState.addons[id]||{};
+    const addonsHtml=CFG.addons.map(a=>{
+      const checked=!!svcAddons[a.id];
+      const addonAmt=a.perSqft?sqft*a.rate:a.rate;
+      const rateLabel=a.perSqft?'+$'+a.rate+'/sqft':'$'+a.rate+' flat';
+      return `<label class="addon-check-item${checked?' checked':''}" id="aci-${id}-${a.id}">
+        <input type="checkbox" ${checked?'checked':''} onchange="toggleAddon('${id}','${a.id}',this.checked)" onclick="event.stopPropagation()">
+        <span class="aci-name">${a.name}</span>
+        <span class="aci-rate">${rateLabel}</span>
+        <span class="aci-amt" id="addon-amt-${id}-${a.id}">${checked?fmt(addonAmt):''}</span>
+      </label>`;
+    }).join('');
+    return `<div class="line-block" id="lib-${id}">
+      <div class="line-main">
+        <div><div class="line-name">${s.name}</div><div class="line-desc">${s.desc}</div></div>
+        <input type="number" class="sqft-input" min="0" step="1" value="${sqft||''}" placeholder="sqft" oninput="updateSqft('${id}',this.value)">
+        <span class="line-amt" id="line-amt-${id}">${fmt(amt)}</span>
+        <button class="line-remove" onclick="toggleService('${id}')" title="Remove">×</button>
+      </div>
+      <div class="line-addons">
+        <div class="line-addons-label">Add-ons for this service</div>
+        <div class="line-addons-grid">${addonsHtml}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function updateSqft(id,val){
-  builderState.sqfts[id]=parseFloat(val)||0;
-  renderLineItems();renderQuotePanel();
+  const sqft=parseFloat(val)||0;
+  builderState.sqfts[id]=sqft;
+  const s=CFG.services.find(x=>x.id===id);
+  if(s){
+    const amtEl=document.getElementById('line-amt-'+id);
+    if(amtEl) amtEl.textContent=fmt(sqft*s.rate);
+  }
+  const svcAddons=builderState.addons[id]||{};
+  CFG.addons.forEach(a=>{
+    if(!svcAddons[a.id])return;
+    const el=document.getElementById('addon-amt-'+id+'-'+a.id);
+    if(el) el.textContent=fmt(a.perSqft?sqft*a.rate:a.rate);
+  });
+  renderQuotePanel();
 }
 
-function renderAddonGrid(){
-  const g=document.getElementById('addon-grid');
-  g.innerHTML=CFG.addons.map(a=>`
-    <div class="addon-item ${builderState.addons[a.id]?'selected':''}" onclick="toggleAddon('${a.id}')">
-      <input type="checkbox" ${builderState.addons[a.id]?'checked':''} id="acheck-${a.id}" onclick="event.stopPropagation()">
-      <div>
-        <label for="acheck-${a.id}">${a.name}</label>
-        <div class="addon-rate">${a.perSqft?'$'+a.rate+'/sqft':'$'+a.rate+' flat'}</div>
-      </div>
-    </div>`).join('');
-}
-
-function toggleAddon(id){
-  if(builderState.addons[id]) delete builderState.addons[id];
-  else builderState.addons[id]=true;
-  renderAddonGrid();renderQuotePanel();
+function toggleAddon(svcId,addonId,checked){
+  if(!builderState.addons[svcId]) builderState.addons[svcId]={};
+  if(checked) builderState.addons[svcId][addonId]=true;
+  else delete builderState.addons[svcId][addonId];
+  const item=document.getElementById('aci-'+svcId+'-'+addonId);
+  const amtEl=document.getElementById('addon-amt-'+svcId+'-'+addonId);
+  if(item){item.classList.toggle('checked',checked);}
+  if(amtEl){
+    const a=CFG.addons.find(x=>x.id===addonId);
+    const sqft=builderState.sqfts[svcId]||0;
+    amtEl.textContent=checked&&a?fmt(a.perSqft?sqft*a.rate:a.rate):'';
+  }
+  renderQuotePanel();
 }
 
 function calcTotals(){
@@ -613,14 +648,17 @@ function calcTotals(){
     return {serviceId:id,name:s.name,sqft,rate:s.rate,amount:sqft*s.rate};
   }).filter(Boolean);
 
-  const totalSqft=lines.reduce((a,l)=>a+l.sqft,0);
-
-  const addonLines=Object.keys(builderState.addons).map(id=>{
-    const a=CFG.addons.find(x=>x.id===id);
-    if(!a)return null;
-    const amount=a.perSqft?totalSqft*a.rate:a.rate;
-    return {addonId:id,name:a.name,sqft:a.perSqft?totalSqft:0,rate:a.rate,perSqft:a.perSqft,amount};
-  }).filter(Boolean);
+  const addonLines=[];
+  Object.keys(builderState.addons).forEach(svcId=>{
+    const svcSqft=builderState.sqfts[svcId]||0;
+    const svcName=(CFG.services.find(x=>x.id===svcId)||{}).name||svcId;
+    Object.keys(builderState.addons[svcId]).forEach(addonId=>{
+      const a=CFG.addons.find(x=>x.id===addonId);
+      if(!a)return;
+      const amount=a.perSqft?svcSqft*a.rate:a.rate;
+      addonLines.push({addonId,serviceId:svcId,serviceName:svcName,name:a.name,sqft:a.perSqft?svcSqft:0,rate:a.rate,perSqft:a.perSqft,amount});
+    });
+  });
 
   const subtotal=lines.reduce((a,l)=>a+l.amount,0)+addonLines.reduce((a,l)=>a+l.amount,0);
   const discount=parseFloat(document.getElementById('discount-input').value)||0;
@@ -728,14 +766,19 @@ function loadQuoteIntoBuilder(q){
   CURRENT_QUOTE_ID=q.id;
   builderState={selected:{},sqfts:{},addons:{},discount:q.discount||0};
   q.lines.forEach(l=>{builderState.selected[l.serviceId]=true;builderState.sqfts[l.serviceId]=l.sqft});
-  q.addonLines.forEach(a=>{builderState.addons[a.addonId]=true});
+  (q.addonLines||[]).forEach(a=>{
+    if(a.serviceId){
+      if(!builderState.addons[a.serviceId]) builderState.addons[a.serviceId]={};
+      builderState.addons[a.serviceId][a.addonId]=true;
+    }
+  });
   document.getElementById('cl-name').value=q.client.name||'';
   document.getElementById('cl-phone').value=q.client.phone||'';
   document.getElementById('cl-address').value=q.client.address||'';
   document.getElementById('cl-email').value=q.client.email||'';
   document.getElementById('quote-notes').value=q.notes||'';
   document.getElementById('discount-input').value=q.discount||0;
-  renderServiceGrid();renderAddonGrid();renderLineItems();renderQuotePanel();
+  renderServiceGrid();renderLineItems();renderQuotePanel();
   showView('builder');
 }
 
@@ -961,7 +1004,7 @@ function saveEditModal(){
     } else {
       CFG.addons.push({id:genId(),name,rate,perSqft});
     }
-    saveSettings();renderAddonsTable();renderAddonGrid();
+    saveSettings();renderAddonsTable();
   }
   closeEditModal();toast('Saved');
 }
@@ -976,7 +1019,7 @@ function deleteService(id){
 function deleteAddon(id){
   showConfirm('Delete this add-on?',()=>{
     CFG.addons=CFG.addons.filter(x=>x.id!==id);
-    saveSettings();renderAddonsTable();renderAddonGrid();toast('Add-on deleted');
+    saveSettings();renderAddonsTable();toast('Add-on deleted');
   });
 }
 
