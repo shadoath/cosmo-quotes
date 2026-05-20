@@ -1056,7 +1056,7 @@ function buildPrintHtml(q){
     <img src="${LOGO}" style="width:70px;height:70px;object-fit:contain">
     <div>
       <div class="print-co-name">${co.name}</div>
-      <div class="print-co-sub">${[co.tagline,co.phone,co.email].filter(Boolean).join('  |  ')}</div>
+      <div class="print-co-sub">${[co.phone,co.email].filter(Boolean).join("  |  ")}</div>
       <div class="print-co-sub">${co.address}</div>
     </div>
   </div>
