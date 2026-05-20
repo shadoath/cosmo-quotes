@@ -1093,7 +1093,6 @@ function buildPrintHtml(q){
   ${q.notes?`<div class="print-section"><div class="print-section-title">Notes</div><div style="font-size:.88rem;color:var(--ink-soft);line-height:1.6">${q.notes}</div></div>`:''}
   <div class="print-section"><div class="print-section-title">Terms &amp; Conditions</div><div class="print-terms">${(CFG.terms||'').replace(/\n/g,'<br>')}</div></div>
   <div class="print-sigs">
-    <div><div style="height:48px"></div><div class="print-sig-line">Authorized Signature &nbsp;·&nbsp; ${co.name}</div></div>
     <div><div style="height:48px"></div><div class="print-sig-line">Client Acceptance &nbsp;·&nbsp; Date</div></div>
   </div>
   <div class="print-footer">${co.name} &nbsp;·&nbsp; ${co.address} &nbsp;·&nbsp; ${co.phone} &nbsp;·&nbsp; ${co.email}${co.website?' &nbsp;·&nbsp; '+co.website:''}</div>`;
