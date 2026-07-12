@@ -1,0 +1,88 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    # Skip fork PRs: they can't access the deploy secrets
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Stage site files
+        run: |
+          mkdir -p dist
+          cp index.html dist/
+
+      - name: Determine deploy branch
+        id: branch
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "name=master" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=$HEAD_REF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=cosmo-quotes --branch="${{ steps.branch.outputs.name }}"
+
+      - name: Comment preview link on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+        with:
+          script: |
+            const url = process.env.ALIAS_URL || process.env.DEPLOYMENT_URL;
+            const marker = '<!-- preview-link -->';
+            const body = [
+              marker,
+              '### 🌐 Preview this change',
+              '',
+              `Click here to see the site with this change applied: ${url}`,
+              '',
+              '_Looks good? Press **Merge pull request** below and it goes live on the real site about a minute later._',
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find(c => c.body && c.body.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
