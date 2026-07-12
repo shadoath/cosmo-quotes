@@ -1,6 +1,6 @@
 # How to Update Your Website
 
-This is the quote builder for Cosmo Tree Services. It lives at **quote.cosmotreeservices.com** (also reachable at cosmo-quotes.pages.dev).
+This is the quote builder for Cosmo Tree Services. Always use it at one address: **quote.cosmotreeservices.com** — bookmark it. Your prices, settings, and saved quotes are stored under the address you use, so sticking to the bookmark keeps everything in one place.
 
 There are two ways to change it, depending on what you need.
 
@@ -14,7 +14,7 @@ You describe what you want in plain English, and an AI assistant makes the chang
 
 ### Step by step
 
-1. Go to the project page on GitHub and click the **Issues** tab, then the green **New issue** button.
+1. Go to the project page on GitHub — **github.com/shadoath/cosmo-quotes** — and click the **Issues** tab, then the green **New issue** button.
 2. Give it a short title, and in the description write what you want changed — in your own words — and include the text `@claude` anywhere in it. For example:
 
    > @claude Make the "Add Service" button bigger and easier to tap on a phone.
@@ -44,4 +44,5 @@ Everything above only works once these are done:
 - [ ] `CLOUDFLARE_API_TOKEN` repo secret set (Pages Write, whiteboardworks account); `CLOUDFLARE_ACCOUNT_ID` is already set.
 - [ ] Owner's GitHub account invited as a collaborator with write access — required both for `@claude` to respond to him and for the Merge button to appear.
 - [ ] `quote.cosmotreeservices.com` attached as a custom domain on the `cosmo-quotes` Pages project, and the owner's DNS host has a CNAME `quote` → `cosmo-quotes.pages.dev`.
+- [ ] Owner bookmarks `quote.cosmotreeservices.com` and uses only that address from day one — app data is stored per-address (localStorage), so anything he sets up on `cosmo-quotes.pages.dev` will not follow him to the custom domain.
 - [ ] Settings PIN handed to the owner privately (never write it in this repo — it's public).
