@@ -321,6 +321,7 @@ select{-webkit-appearance:none;appearance:none;background-image:url("data:image/
           <div class="form-row"><div class="form-group"><label>Tax Rate (%)</label><input type="number" id="s-tax" min="0" step="0.01"></div><div class="form-group"><label>Expiry Days</label><input type="number" id="s-expiry" min="1"></div></div>
           <div class="form-row"><div class="form-group"><label>Quote # Prefix</label><input type="text" id="s-prefix"></div><div class="form-group"><label>Next Quote #</label><input type="number" id="s-nextnum" min="1"></div></div>
           <div class="form-row"><div class="form-group"><label>Minimum Charge ($)</label><input type="number" id="s-mincharge" min="0" step="0.01"></div></div>
+          <div class="form-row"><div class="form-group form-full"><label>How to Pay (shown on quote)</label><textarea id="s-payment" rows="3"></textarea></div></div>
           <div class="form-row"><div class="form-group form-full"><label>Payment Terms</label><textarea id="s-terms" rows="5"></textarea></div></div>
           <div class="form-actions"><button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button></div>
         </div>
@@ -417,7 +418,8 @@ const DEFAULT_SETTINGS = {
   pin:'5277',
   company:{name:'Cosmo Tree Services',tagline:'Lawn Care & Tree Services',address:'Gainesville, FL 32605',phone:'(689) 272-7810',email:'cosmotreeservices@gmail.com',website:'www.cosmotreeservices.com'},
   quotePrefix:'CTS',nextQuoteNum:1001,taxRate:0,expiryDays:30,minCharge:0,
-  terms:'Payment is due upon completion of services. We accept cash, check, and all major credit cards. A 50% deposit may be required for jobs over $500. Prices are valid for 30 days from the quote date.',
+  terms:'Payment is due upon completion of services. A 50% deposit may be required for jobs over $500. Prices are valid for 30 days from the quote date.',
+  paymentDetails:'We accept cash, check, Zelle, and all major credit cards. Checks payable to Cosmo Tree Services. Ask about paying by card at time of service.',
   services:[
     {id:'removal_sm',name:'Tree Removal – Small',rate:300,unit:'tree',desc:'Under 30 ft'},
     {id:'removal_md',name:'Tree Removal – Medium',rate:600,unit:'tree',desc:'30–60 ft'},
@@ -897,6 +899,7 @@ function renderSettings(){
   document.getElementById('s-prefix').value=CFG.quotePrefix||'CTS';
   document.getElementById('s-nextnum').value=CFG.nextQuoteNum||1001;
   document.getElementById('s-mincharge').value=CFG.minCharge||0;
+  document.getElementById('s-payment').value=CFG.paymentDetails||'';
   document.getElementById('s-terms').value=CFG.terms||'';
   renderServicesTable();renderAddonsTable();
 }
@@ -1055,6 +1058,7 @@ function saveDefaultSettings(){
   CFG.quotePrefix=document.getElementById('s-prefix').value||'CTS';
   CFG.nextQuoteNum=parseInt(document.getElementById('s-nextnum').value)||1001;
   CFG.minCharge=parseFloat(document.getElementById('s-mincharge').value)||0;
+  CFG.paymentDetails=document.getElementById('s-payment').value;
   CFG.terms=document.getElementById('s-terms').value;
   saveSettings();toast('Defaults saved');
 }
@@ -1117,6 +1121,7 @@ function buildPrintHtml(q){
     ${q.monthlyTotal>0?`<div class="print-totals-row final"><span>MONTHLY</span><span style="font-family:'JetBrains Mono',monospace">${fmt(q.monthlyTotal)}/mo</span></div>`:''}
   </div>
   ${q.notes?`<div class="print-section"><div class="print-section-title">Notes</div><div style="font-size:.88rem;color:var(--ink-soft);line-height:1.6">${q.notes}</div></div>`:''}
+  ${CFG.paymentDetails?`<div class="print-section"><div class="print-section-title">How to Pay</div><div class="print-terms">${CFG.paymentDetails.replace(/\n/g,'<br>')}</div></div>`:''}
   <div class="print-section"><div class="print-section-title">Terms &amp; Conditions</div><div class="print-terms">${(CFG.terms||'').replace(/\n/g,'<br>')}</div></div>
   <div class="print-sigs">
     <div><div style="height:48px"></div><div class="print-sig-line">Client Acceptance &nbsp;·&nbsp; Date</div></div>
