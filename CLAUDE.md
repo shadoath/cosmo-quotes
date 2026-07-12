@@ -15,7 +15,9 @@ The site owner is non-technical. Issues arrive as plain-English requests (often 
 
 ## Deploys
 
-Merging to `master` auto-deploys to production (Cloudflare Pages, `quote.cosmotreeservices.com`). Every PR gets a preview deploy; a bot comment on the PR links to it. No manual deploy steps are needed in PRs.
+Merging to `master` auto-deploys to production (Cloudflare Pages, `quote.cosmotreeservices.com` / `cosmo-quotes.pages.dev`). Every PR from a branch in this repo gets a preview deploy; a bot comment on the PR links to it (fork PRs are skipped — they can't access deploy secrets). No manual deploy steps are needed in PRs.
+
+When you finish work on an issue, you cannot open the PR yourself — the owner clicks the create-PR link in your reply. Put that link where it can't be missed and tell him, in plain words, to click it and then press the green "Create pull request" button.
 
 ## Testing
 

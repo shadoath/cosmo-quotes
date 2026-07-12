@@ -1,6 +1,6 @@
 # How to Update Your Website
 
-This is the quote builder for Cosmo Tree Services. It lives at **quote.cosmotreeservices.com**.
+This is the quote builder for Cosmo Tree Services. It lives at **quote.cosmotreeservices.com** (also reachable at cosmo-quotes.pages.dev).
 
 There are two ways to change it, depending on what you need.
 
@@ -17,19 +17,31 @@ You describe what you want in plain English, and an AI assistant makes the chang
 1. Go to the project page on GitHub and click the **Issues** tab, then the green **New issue** button.
 2. Give it a short title, and in the description write what you want changed — in your own words — and include the text `@claude` anywhere in it. For example:
 
-   > @claude Add a new service line called "Stump Grinding" with a default price of $150.
+   > @claude Make the "Add Service" button bigger and easier to tap on a phone.
 
-3. Wait a few minutes. Claude (the AI) will reply on your issue and open a **pull request** — that's a proposed change waiting for your approval.
-4. On the pull request page, look for the **"Preview this change"** comment and click the link. That's a private copy of the site with the change applied. Check it on your phone or computer.
+3. Wait a few minutes. Claude (the AI) will reply on your issue with what it changed and a **link to create a pull request** — a proposed change waiting for your approval. Click that link, then press the green **Create pull request** button on the page that opens.
+4. On the pull request page, wait for the **"Preview this change"** comment (a minute or two), then click its link. That's a separate test copy of the site with the change applied — check it on your phone or computer. The test copy shows example data, not your real prices or saved quotes, so judge the change itself, not the numbers.
 5. Happy with it? Press the green **Merge pull request** button (then **Confirm merge**). The real website updates about a minute later.
-6. Not happy? Reply on the pull request with what to fix and include `@claude` again — for example: *"@claude make the button bigger and green."* A new preview link will appear when it's done.
+6. Not happy? Reply on the pull request with what to fix and include `@claude` again — for example: *"@claude make the button green instead."* When the fix is ready, a fresh **"Preview this change"** comment appears (you'll get an email), with a link to the updated preview.
 
 ### Things to know
 
 - Nothing goes live until **you** press Merge. Looking at previews is always safe.
 - An automatic reviewer also checks every change for mistakes and leaves notes.
 - Your saved quotes and settings live in your own browser — website updates never erase them.
+- Preview links aren't secret-proof: anyone you send one to can open it. Fine for showing a change to someone, just don't treat previews as hidden.
 
 ## If something breaks or you get stuck
 
 Contact Skylar. Hosting, the AI assistant, and the domain plumbing are managed for you under your maintenance arrangement.
+
+---
+
+## One-time setup checklist (Skylar)
+
+Everything above only works once these are done:
+
+- [ ] `CLOUDFLARE_API_TOKEN` repo secret set (Pages Write, whiteboardworks account); `CLOUDFLARE_ACCOUNT_ID` is already set.
+- [ ] Owner's GitHub account invited as a collaborator with write access — required both for `@claude` to respond to him and for the Merge button to appear.
+- [ ] `quote.cosmotreeservices.com` attached as a custom domain on the `cosmo-quotes` Pages project, and the owner's DNS host has a CNAME `quote` → `cosmo-quotes.pages.dev`.
+- [ ] Settings PIN handed to the owner privately (never write it in this repo — it's public).
