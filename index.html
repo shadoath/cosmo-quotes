@@ -85,7 +85,10 @@ textarea{resize:vertical;min-height:80px}
 .qp-line .qp-lsub{font-size:.75rem;color:var(--muted)}
 .qp-line .qp-lamt{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--ink);white-space:nowrap}
 .qp-addon{color:var(--muted);font-style:italic}
-.qp-line.qp-sub{border-bottom:none;padding:2px 0}
+.qp-group{border-bottom:1px solid var(--line-soft)}
+.qp-group:last-child{border-bottom:none}
+.qp-group .qp-line{border-bottom:none}
+.qp-line.qp-sub{padding:2px 0}
 .qp-line.qp-sub .qp-lname{font-size:.78rem;color:var(--muted)}
 .qp-line.qp-sub .qp-lamt{font-size:.8rem;color:var(--muted)}
 .discount-row{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 0;border-top:1px solid var(--line-soft)}
@@ -179,7 +182,7 @@ textarea{resize:vertical;min-height:80px}
 .print-items-table{width:100%;border-collapse:collapse;margin-bottom:20px}
 .print-items-table th{background:var(--accent-ink);color:#fff;font-family:'Oswald',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;text-align:left}
 .print-items-table td{padding:10px 14px;border-bottom:1px solid var(--line-soft);font-size:.88rem}
-.print-items-table tr:nth-child(even) td{background:#f9f9f7}
+.print-items-table tr.alt td{background:#f9f9f7}
 .print-items-table tr.sub-row td{background:#fdfdfb;font-size:.8rem;color:var(--muted)}
 .print-totals{max-width:300px;margin-left:auto;margin-bottom:24px}
 .print-totals-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.9rem;border-bottom:1px solid var(--line-soft)}
@@ -493,29 +496,48 @@ function loadSettings(){
   CFG = s ? Object.assign({},DEFAULT_SETTINGS,s) : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
   if(!CFG.services) CFG.services = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.services));
   if(!CFG.addons) CFG.addons = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.addons));
-  if(!(s&&s.modifiers)) CFG.modifiers = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.modifiers));
-  if(s) migrateLegacyServices();
+  if(s&&!s.modifiers) CFG.modifiers = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.modifiers));
+  migrateLegacyServices();
 }
 
+const LEGACY_SERVICES=[
+  {oldSvc:{id:'trimming',name:'Tree Trimming',rate:250,unit:'tree',desc:'Shape & maintain appearance'},newIds:['trimming_sm','trimming_md','trimming_lg'],remapTo:'trimming_md'},
+  {oldSvc:{id:'pruning',name:'Tree Pruning',rate:200,unit:'tree',desc:'Selective removal for health & structure'},newIds:['pruning_sm','pruning_md','pruning_lg'],remapTo:'pruning_md'}
+];
+
+// In-memory only (idempotent, runs every load): nothing is written to localStorage until the owner saves.
+// Splits single-rate trimming/pruning into S/M/L, but only if every field still matches the old default.
 function migrateLegacyServices(){
-  // Split single-rate trimming/pruning into S/M/L, but only if the owner never customized them
-  const legacy=[
-    {id:'trimming',rate:250,newIds:['trimming_sm','trimming_md','trimming_lg']},
-    {id:'pruning',rate:200,newIds:['pruning_sm','pruning_md','pruning_lg']}
-  ];
-  let changed=false;
-  legacy.forEach(m=>{
-    const idx=CFG.services.findIndex(x=>x.id===m.id);
-    if(idx<0||CFG.services[idx].rate!==m.rate)return;
+  LEGACY_SERVICES.forEach(m=>{
+    const idx=CFG.services.findIndex(x=>x.id===m.oldSvc.id);
+    if(idx<0)return;
+    const cur=CFG.services[idx];
+    const untouched=['name','rate','unit','desc'].every(k=>cur[k]===m.oldSvc[k])&&!cur.recurring;
+    if(!untouched)return;
     const repl=DEFAULT_SETTINGS.services.filter(x=>m.newIds.includes(x.id)).map(x=>JSON.parse(JSON.stringify(x)));
     CFG.services.splice(idx,1,...repl);
-    changed=true;
   });
-  if(changed)saveSettings();
+}
+
+// Point saved quote lines at the size-split ids so old quotes still open in the builder;
+// rateOverride keeps their original price. In-memory only — persisted whenever a quote is next saved.
+function remapLegacyQuoteLines(){
+  LEGACY_SERVICES.forEach(m=>{
+    if(CFG.services.find(x=>x.id===m.oldSvc.id))return;
+    if(!CFG.services.find(x=>x.id===m.remapTo))return;
+    QUOTES.forEach(q=>{
+      (q.lines||[]).forEach(l=>{
+        if(l.serviceId!==m.oldSvc.id)return;
+        l.serviceId=m.remapTo;
+        if(l.rateOverride==null)l.rateOverride=l.rate;
+      });
+      (q.addonLines||[]).forEach(a=>{if(a.serviceId===m.oldSvc.id)a.serviceId=m.remapTo});
+    });
+  });
 }
 
 function saveSettings(){DB.set('cosmo_settings',CFG)}
-function loadQuotes(){QUOTES=DB.get('cosmo_quotes')||[]}
+function loadQuotes(){QUOTES=DB.get('cosmo_quotes')||[];remapLegacyQuoteLines()}
 function saveQuotes(){DB.set('cosmo_quotes',QUOTES)}
 
 function todayISO(){const d=new Date();return d.toISOString().split('T')[0]}
@@ -638,22 +660,24 @@ function modOptions(kind,selectedId){
   return ((CFG.modifiers&&CFG.modifiers[kind])||[]).map(m=>`<option value="${m.id}"${m.id===selectedId?' selected':''}>${m.label}${m.pct?` (+${m.pct}%)`:''}</option>`).join('');
 }
 
-// Single source of truth for per-line math (rate override + hazard/access surcharges)
+// Single source of truth for per-line math (rate override + hazard/access surcharges).
+// Each amount is rounded to cents so the printed rows always sum exactly to the totals.
 function computeLine(s){
+  const round2=n=>Math.round(n*100)/100;
   const qty=builderState.qtys[s.id]||0;
   const visitsCalc=s.recurring?Math.max(1,builderState.visits[s.id]||1):1;
   const ov=builderState.rates[s.id];
   const rate=ov!=null?ov:s.rate;
-  const baseAmount=qty*rate*visitsCalc;
+  const baseAmount=round2(qty*rate*visitsCalc);
   const hz=getModLevel('hazard',builderState.hazard[s.id]);
   const ac=getModLevel('access',builderState.access[s.id]);
-  const hazardAmt=baseAmount*hz.pct/100;
-  const accessAmt=baseAmount*ac.pct/100;
+  const hazardAmt=round2(baseAmount*hz.pct/100);
+  const accessAmt=round2(baseAmount*ac.pct/100);
   const line={
     qty,visits:s.recurring?visitsCalc:0,rate,baseAmount,
     hazardId:hz.id,hazardLabel:hz.label,hazardPct:hz.pct,hazardAmt,
     accessId:ac.id,accessLabel:ac.label,accessPct:ac.pct,accessAmt,
-    amount:baseAmount+hazardAmt+accessAmt
+    amount:round2(baseAmount+hazardAmt+accessAmt)
   };
   if(ov!=null)line.rateOverride=ov;
   return line;
@@ -702,7 +726,7 @@ function renderLineItems(){
         <div><label>Hazard</label><select onchange="updateLineMod('${id}','hazard',this.value)">${modOptions('hazard',c.hazardId)}</select></div>
         <div><label>Access</label><select onchange="updateLineMod('${id}','access',this.value)">${modOptions('access',c.accessId)}</select></div>
       </div>
-      ${s.recurring?`<div class="line-freq"><label>Visits / month</label><input type="number" class="qty-input" min="1" step="1" value="${Math.max(1,builderState.visits[id]||1)}" oninput="updateVisits('${id}',this.value)"><span class="freq-mo">billed monthly</span></div>`:''}
+      ${s.recurring?`<div class="line-freq"><label>Visits / month</label><input type="number" class="qty-input" min="1" step="1" value="${c.visits}" oninput="updateVisits('${id}',this.value)"><span class="freq-mo">billed monthly</span></div>`:''}
       <div class="line-addons">
         <div class="line-addons-label">Add-ons for this service</div>
         <div class="line-addons-grid">${addonsHtml}</div>
@@ -733,10 +757,11 @@ function updateVisits(id,val){
 function updateRate(id,val){
   const s=CFG.services.find(x=>x.id===id);
   if(!s)return;
-  const r=parseFloat(val);
-  // Reverting to the configured rate drops the override so the line tracks future Settings changes
-  if(isNaN(r)||r===s.rate) delete builderState.rates[id];
-  else builderState.rates[id]=Math.max(0,r);
+  // Blank/invalid means 0, like the qty field. Reverting to the configured rate drops the
+  // override so the line tracks future Settings changes.
+  const r=Math.max(0,parseFloat(val)||0);
+  if(r===s.rate) delete builderState.rates[id];
+  else builderState.rates[id]=r;
   patchLineAmt(id);
   renderQuotePanel();
 }
@@ -805,12 +830,14 @@ function renderQuotePanel(){
     linesEl.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:8px 0">No services selected</div>';
   } else {
     linesEl.innerHTML=lines.map(l=>`
-      <div class="qp-line">
-        <div class="qp-lname">${l.name}<div class="qp-lsub">${l.qty.toLocaleString()} ${l.unit}${l.recurring?' × '+l.visits+'/mo':''}</div></div>
-        <div class="qp-lamt">${fmt(l.baseAmount)}${l.recurring?'/mo':''}</div>
-      </div>
-      ${l.hazardAmt>0?`<div class="qp-line qp-sub"><div class="qp-lname">↳ Hazard – ${l.hazardLabel} (+${l.hazardPct}%)</div><div class="qp-lamt">${fmt(l.hazardAmt)}${l.recurring?'/mo':''}</div></div>`:''}
-      ${l.accessAmt>0?`<div class="qp-line qp-sub"><div class="qp-lname">↳ Access – ${l.accessLabel} (+${l.accessPct}%)</div><div class="qp-lamt">${fmt(l.accessAmt)}${l.recurring?'/mo':''}</div></div>`:''}`).join('')+
+      <div class="qp-group">
+        <div class="qp-line">
+          <div class="qp-lname">${l.name}<div class="qp-lsub">${l.qty.toLocaleString()} ${l.unit}${l.recurring?' × '+l.visits+'/mo':''}</div></div>
+          <div class="qp-lamt">${fmt(l.baseAmount)}${l.recurring?'/mo':''}</div>
+        </div>
+        ${l.hazardAmt>0?`<div class="qp-line qp-sub"><div class="qp-lname">↳ Hazard – ${l.hazardLabel} (+${l.hazardPct}%)</div><div class="qp-lamt">${fmt(l.hazardAmt)}${l.recurring?'/mo':''}</div></div>`:''}
+        ${l.accessAmt>0?`<div class="qp-line qp-sub"><div class="qp-lname">↳ Access – ${l.accessLabel} (+${l.accessPct}%)</div><div class="qp-lamt">${fmt(l.accessAmt)}${l.recurring?'/mo':''}</div></div>`:''}
+      </div>`).join('')+
       addonLines.map(a=>`
       <div class="qp-line qp-addon">
         <div class="qp-lname">+ ${a.name}${a.perUnit?' ('+a.qty.toLocaleString()+' '+a.unit+')':''}</div>
@@ -890,7 +917,9 @@ function saveQuoteToList(q){
 function loadQuoteIntoBuilder(q){
   CURRENT_QUOTE_ID=q.id;
   builderState={selected:{},qtys:{},visits:{},addons:{},rates:{},hazard:{},access:{},discount:q.discount||0};
+  let dropped=false;
   q.lines.forEach(l=>{
+    if(!CFG.services.find(x=>x.id===l.serviceId)){dropped=true;return}
     builderState.selected[l.serviceId]=true;
     builderState.qtys[l.serviceId]=l.qty;
     if(l.visits)builderState.visits[l.serviceId]=l.visits;
@@ -898,13 +927,13 @@ function loadQuoteIntoBuilder(q){
     if(l.hazardId)builderState.hazard[l.serviceId]=l.hazardId;
     if(l.accessId)builderState.access[l.serviceId]=l.accessId;
   });
-  if(q.lines.some(l=>!CFG.services.find(x=>x.id===l.serviceId))) toast('Some services on this quote no longer exist — their lines were dropped');
   (q.addonLines||[]).forEach(a=>{
-    if(a.serviceId){
+    if(a.serviceId&&builderState.selected[a.serviceId]){
       if(!builderState.addons[a.serviceId]) builderState.addons[a.serviceId]={};
       builderState.addons[a.serviceId][a.addonId]=true;
     }
   });
+  if(dropped) toast('Some services on this quote no longer exist — their lines were dropped');
   document.getElementById('cl-name').value=q.client.name||'';
   document.getElementById('cl-phone').value=q.client.phone||'';
   document.getElementById('cl-address').value=q.client.address||'';
@@ -1187,6 +1216,7 @@ function saveDefaultSettings(){
     access:readMods('ac',DEFAULT_SETTINGS.modifiers.access)
   };
   saveSettings();
+  renderSettings();
   renderLineItems();renderQuotePanel();
   toast('Defaults saved');
 }
@@ -1204,15 +1234,17 @@ function changePin(){
 
 function buildPrintHtml(q){
   const co=CFG.company;
+  let rowIdx=0;
+  const altCls=()=>rowIdx++%2?' class="alt"':'';
   const linesHtml=q.lines.map(l=>{
     // Read only saved snapshot fields so history reprints stay as-saved; old quotes lack baseAmount
     const base=l.baseAmount!=null?l.baseAmount:l.amount;
-    let rows=`<tr><td>${l.name}${l.recurring?' (monthly service)':''}</td><td>${(l.qty||0).toLocaleString()} ${l.unit||''}${l.recurring?' × '+l.visits+'/mo':''}</td><td>${fmt(l.rate)}/${l.unit||'ea'}</td><td>${fmt(base)}${l.recurring?'/mo':''}</td></tr>`;
+    let rows=`<tr${altCls()}><td>${l.name}${l.recurring?' (monthly service)':''}</td><td>${(l.qty||0).toLocaleString()} ${l.unit||''}${l.recurring?' × '+l.visits+'/mo':''}</td><td>${fmt(l.rate)}/${l.unit||'ea'}</td><td>${fmt(base)}${l.recurring?'/mo':''}</td></tr>`;
     if(l.hazardAmt>0)rows+=`<tr class="sub-row"><td style="padding-left:26px">↳ Hazard – ${l.hazardLabel} (+${l.hazardPct}%)</td><td></td><td></td><td>${fmt(l.hazardAmt)}${l.recurring?'/mo':''}</td></tr>`;
     if(l.accessAmt>0)rows+=`<tr class="sub-row"><td style="padding-left:26px">↳ Access – ${l.accessLabel} (+${l.accessPct}%)</td><td></td><td></td><td>${fmt(l.accessAmt)}${l.recurring?'/mo':''}</td></tr>`;
     return rows;
   }).join('');
-  const addonHtml=q.addonLines.map(a=>`<tr><td>+ ${a.name}</td><td>${a.perUnit?(a.qty||0).toLocaleString()+' '+(a.unit||''):'—'}</td><td>${a.perUnit?fmt(a.rate)+'/'+(a.unit||'unit'):fmt(a.rate)+' flat'}</td><td>${fmt(a.amount)}</td></tr>`).join('');
+  const addonHtml=q.addonLines.map(a=>`<tr${altCls()}><td>+ ${a.name}</td><td>${a.perUnit?(a.qty||0).toLocaleString()+' '+(a.unit||''):'—'}</td><td>${a.perUnit?fmt(a.rate)+'/'+(a.unit||'unit'):fmt(a.rate)+' flat'}</td><td>${fmt(a.amount)}</td></tr>`).join('');
   const discountRow=q.discount>0?`<div class="print-totals-row"><span>Discount</span><span>- ${fmt(q.discount)}</span></div>`:'';
   const taxRow=CFG.taxRate>0?`<div class="print-totals-row"><span>Tax (${CFG.taxRate}%)</span><span>${fmt(q.taxAmt)}</span></div>`:'';
 
