@@ -480,16 +480,10 @@ let QUOTES = [];
 let SESSION_UNLOCKED = false;
 let CURRENT_QUOTE_ID = null;
 
-let builderState = {
-  selected:{},
-  qtys:{},
-  visits:{},
-  addons:{},
-  rates:{},
-  hazard:{},
-  access:{},
-  discount:0
-};
+function freshBuilderState(discount){
+  return {selected:{},qtys:{},visits:{},addons:{},rates:{},hazard:{},access:{},discount:discount||0};
+}
+let builderState = freshBuilderState();
 
 function loadSettings(){
   const s = DB.get('cosmo_settings');
@@ -612,7 +606,7 @@ function pinKey(k){
 
 function newQuote(){
   CURRENT_QUOTE_ID=null;
-  builderState={selected:{},qtys:{},visits:{},addons:{},rates:{},hazard:{},access:{},discount:0};
+  builderState=freshBuilderState();
   document.getElementById('cl-name').value='';
   document.getElementById('cl-phone').value='';
   document.getElementById('cl-address').value='';
@@ -636,12 +630,7 @@ function renderServiceGrid(){
 function toggleService(id){
   if(builderState.selected[id]){
     delete builderState.selected[id];
-    delete builderState.qtys[id];
-    delete builderState.visits[id];
-    delete builderState.addons[id];
-    delete builderState.rates[id];
-    delete builderState.hazard[id];
-    delete builderState.access[id];
+    ['qtys','visits','addons','rates','hazard','access'].forEach(k=>delete builderState[k][id]);
   } else {
     builderState.selected[id]=true;
     builderState.qtys[id]=builderState.qtys[id]||0;
@@ -653,7 +642,7 @@ function toggleService(id){
 
 function getModLevel(kind,id){
   const list=(CFG.modifiers&&CFG.modifiers[kind])||[];
-  return list.find(m=>m.id===id)||list[0]||{id:'none',label:'None',pct:0};
+  return list.find(m=>m.id===id)||list[0]||DEFAULT_SETTINGS.modifiers[kind][0];
 }
 
 function modOptions(kind,selectedId){
@@ -829,14 +818,15 @@ function renderQuotePanel(){
   if(!lines.length&&!addonLines.length){
     linesEl.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:8px 0">No services selected</div>';
   } else {
+    const qpSub=(kind,label,pct,amt,rec)=>amt>0?`<div class="qp-line qp-sub"><div class="qp-lname">↳ ${kind} – ${label} (+${pct}%)</div><div class="qp-lamt">${fmt(amt)}${rec?'/mo':''}</div></div>`:'';
     linesEl.innerHTML=lines.map(l=>`
       <div class="qp-group">
         <div class="qp-line">
           <div class="qp-lname">${l.name}<div class="qp-lsub">${l.qty.toLocaleString()} ${l.unit}${l.recurring?' × '+l.visits+'/mo':''}</div></div>
           <div class="qp-lamt">${fmt(l.baseAmount)}${l.recurring?'/mo':''}</div>
         </div>
-        ${l.hazardAmt>0?`<div class="qp-line qp-sub"><div class="qp-lname">↳ Hazard – ${l.hazardLabel} (+${l.hazardPct}%)</div><div class="qp-lamt">${fmt(l.hazardAmt)}${l.recurring?'/mo':''}</div></div>`:''}
-        ${l.accessAmt>0?`<div class="qp-line qp-sub"><div class="qp-lname">↳ Access – ${l.accessLabel} (+${l.accessPct}%)</div><div class="qp-lamt">${fmt(l.accessAmt)}${l.recurring?'/mo':''}</div></div>`:''}
+        ${qpSub('Hazard',l.hazardLabel,l.hazardPct,l.hazardAmt,l.recurring)}
+        ${qpSub('Access',l.accessLabel,l.accessPct,l.accessAmt,l.recurring)}
       </div>`).join('')+
       addonLines.map(a=>`
       <div class="qp-line qp-addon">
@@ -916,7 +906,7 @@ function saveQuoteToList(q){
 
 function loadQuoteIntoBuilder(q){
   CURRENT_QUOTE_ID=q.id;
-  builderState={selected:{},qtys:{},visits:{},addons:{},rates:{},hazard:{},access:{},discount:q.discount||0};
+  builderState=freshBuilderState(q.discount||0);
   let dropped=false;
   q.lines.forEach(l=>{
     if(!CFG.services.find(x=>x.id===l.serviceId)){dropped=true;return}
@@ -933,7 +923,7 @@ function loadQuoteIntoBuilder(q){
       builderState.addons[a.serviceId][a.addonId]=true;
     }
   });
-  if(dropped) toast('Some services on this quote no longer exist — their lines were dropped');
+  if(dropped) toast('Some services on this quote no longer exist — their lines and add-ons were removed. Review totals before saving.');
   document.getElementById('cl-name').value=q.client.name||'';
   document.getElementById('cl-phone').value=q.client.phone||'';
   document.getElementById('cl-address').value=q.client.address||'';
@@ -1033,6 +1023,11 @@ function renderSettings(){
   document.getElementById('s-co-phone').value=c.phone||'';
   document.getElementById('s-co-email').value=c.email||'';
   document.getElementById('s-co-web').value=c.website||'';
+  renderDefaultsSettings();
+  renderServicesTable();renderAddonsTable();
+}
+
+function renderDefaultsSettings(){
   document.getElementById('s-tax').value=CFG.taxRate||0;
   document.getElementById('s-expiry').value=CFG.expiryDays||30;
   document.getElementById('s-prefix').value=CFG.quotePrefix||'CTS';
@@ -1047,7 +1042,6 @@ function renderSettings(){
       document.getElementById(`s-${px}${i}-pct`).value=m.pct;
     }
   });
-  renderServicesTable();renderAddonsTable();
 }
 
 function showSettingsTab(tab){
@@ -1170,7 +1164,7 @@ function saveEditModal(){
     } else {
       CFG.services.push({id:genId(),name,rate,unit,desc,recurring});
     }
-    saveSettings();renderServicesTable();renderServiceGrid();
+    saveSettings();renderServicesTable();renderServiceGrid();renderLineItems();renderQuotePanel();
   } else {
     const perUnit=document.getElementById('em-perunit').value==='1';
     if(id){
@@ -1179,7 +1173,7 @@ function saveEditModal(){
     } else {
       CFG.addons.push({id:genId(),name,rate,perUnit});
     }
-    saveSettings();renderAddonsTable();
+    saveSettings();renderAddonsTable();renderLineItems();renderQuotePanel();
   }
   closeEditModal();toast('Saved');
 }
@@ -1187,14 +1181,18 @@ function saveEditModal(){
 function deleteService(id){
   showConfirm('Delete this service?',()=>{
     CFG.services=CFG.services.filter(x=>x.id!==id);
-    saveSettings();renderServicesTable();renderServiceGrid();toast('Service deleted');
+    if(builderState.selected[id]){
+      delete builderState.selected[id];
+      ['qtys','visits','addons','rates','hazard','access'].forEach(k=>delete builderState[k][id]);
+    }
+    saveSettings();renderServicesTable();renderServiceGrid();renderLineItems();renderQuotePanel();toast('Service deleted');
   });
 }
 
 function deleteAddon(id){
   showConfirm('Delete this add-on?',()=>{
     CFG.addons=CFG.addons.filter(x=>x.id!==id);
-    saveSettings();renderAddonsTable();toast('Add-on deleted');
+    saveSettings();renderAddonsTable();renderLineItems();renderQuotePanel();toast('Add-on deleted');
   });
 }
 
@@ -1206,17 +1204,18 @@ function saveDefaultSettings(){
   CFG.minCharge=parseFloat(document.getElementById('s-mincharge').value)||0;
   CFG.paymentDetails=document.getElementById('s-payment').value;
   CFG.terms=document.getElementById('s-terms').value;
-  const readMods=(px,defs)=>defs.map((d,i)=>({
-    id:d.id,
-    label:document.getElementById(`s-${px}${i}-label`).value.trim()||d.label,
-    pct:Math.max(0,parseFloat(document.getElementById(`s-${px}${i}-pct`).value)||0)
-  }));
-  CFG.modifiers={
-    hazard:readMods('hz',DEFAULT_SETTINGS.modifiers.hazard),
-    access:readMods('ac',DEFAULT_SETTINGS.modifiers.access)
-  };
+  // Blank label keeps the currently saved one (not the factory default)
+  const readMods=(px,kind)=>DEFAULT_SETTINGS.modifiers[kind].map((d,i)=>{
+    const cur=(CFG.modifiers&&CFG.modifiers[kind]&&CFG.modifiers[kind][i])||d;
+    return {
+      id:d.id,
+      label:document.getElementById(`s-${px}${i}-label`).value.trim()||cur.label,
+      pct:Math.max(0,parseFloat(document.getElementById(`s-${px}${i}-pct`).value)||0)
+    };
+  });
+  CFG.modifiers={hazard:readMods('hz','hazard'),access:readMods('ac','access')};
   saveSettings();
-  renderSettings();
+  renderDefaultsSettings();
   renderLineItems();renderQuotePanel();
   toast('Defaults saved');
 }
@@ -1236,13 +1235,13 @@ function buildPrintHtml(q){
   const co=CFG.company;
   let rowIdx=0;
   const altCls=()=>rowIdx++%2?' class="alt"':'';
+  const printSub=(kind,label,pct,amt,rec)=>amt>0?`<tr class="sub-row"><td style="padding-left:26px">↳ ${kind} – ${label} (+${pct}%)</td><td></td><td></td><td>${fmt(amt)}${rec?'/mo':''}</td></tr>`:'';
   const linesHtml=q.lines.map(l=>{
     // Read only saved snapshot fields so history reprints stay as-saved; old quotes lack baseAmount
     const base=l.baseAmount!=null?l.baseAmount:l.amount;
-    let rows=`<tr${altCls()}><td>${l.name}${l.recurring?' (monthly service)':''}</td><td>${(l.qty||0).toLocaleString()} ${l.unit||''}${l.recurring?' × '+l.visits+'/mo':''}</td><td>${fmt(l.rate)}/${l.unit||'ea'}</td><td>${fmt(base)}${l.recurring?'/mo':''}</td></tr>`;
-    if(l.hazardAmt>0)rows+=`<tr class="sub-row"><td style="padding-left:26px">↳ Hazard – ${l.hazardLabel} (+${l.hazardPct}%)</td><td></td><td></td><td>${fmt(l.hazardAmt)}${l.recurring?'/mo':''}</td></tr>`;
-    if(l.accessAmt>0)rows+=`<tr class="sub-row"><td style="padding-left:26px">↳ Access – ${l.accessLabel} (+${l.accessPct}%)</td><td></td><td></td><td>${fmt(l.accessAmt)}${l.recurring?'/mo':''}</td></tr>`;
-    return rows;
+    return `<tr${altCls()}><td>${l.name}${l.recurring?' (monthly service)':''}</td><td>${(l.qty||0).toLocaleString()} ${l.unit||''}${l.recurring?' × '+l.visits+'/mo':''}</td><td>${fmt(l.rate)}/${l.unit||'ea'}</td><td>${fmt(base)}${l.recurring?'/mo':''}</td></tr>`
+      +printSub('Hazard',l.hazardLabel,l.hazardPct,l.hazardAmt,l.recurring)
+      +printSub('Access',l.accessLabel,l.accessPct,l.accessAmt,l.recurring);
   }).join('');
   const addonHtml=q.addonLines.map(a=>`<tr${altCls()}><td>+ ${a.name}</td><td>${a.perUnit?(a.qty||0).toLocaleString()+' '+(a.unit||''):'—'}</td><td>${a.perUnit?fmt(a.rate)+'/'+(a.unit||'unit'):fmt(a.rate)+' flat'}</td><td>${fmt(a.amount)}</td></tr>`).join('');
   const discountRow=q.discount>0?`<div class="print-totals-row"><span>Discount</span><span>- ${fmt(q.discount)}</span></div>`:'';
