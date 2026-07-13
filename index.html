@@ -58,6 +58,8 @@ textarea{resize:vertical;min-height:80px}
 .line-freq label{font-size:.72rem;color:var(--muted)}
 .line-freq input{max-width:70px}
 .line-freq .freq-mo{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--accent-dark);font-weight:600}
+.line-mods{display:grid;grid-template-columns:110px 1fr 1fr;gap:10px;margin-top:8px;align-items:end}
+.line-mods label{font-size:.72rem;color:var(--muted)}
 .line-addons{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}
 .line-addons-label{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .line-addons-grid{display:flex;flex-wrap:wrap;gap:6px}
@@ -83,6 +85,12 @@ textarea{resize:vertical;min-height:80px}
 .qp-line .qp-lsub{font-size:.75rem;color:var(--muted)}
 .qp-line .qp-lamt{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--ink);white-space:nowrap}
 .qp-addon{color:var(--muted);font-style:italic}
+.qp-group{border-bottom:1px solid var(--line-soft)}
+.qp-group:last-child{border-bottom:none}
+.qp-group .qp-line{border-bottom:none}
+.qp-line.qp-sub{padding:2px 0}
+.qp-line.qp-sub .qp-lname{font-size:.78rem;color:var(--muted)}
+.qp-line.qp-sub .qp-lamt{font-size:.8rem;color:var(--muted)}
 .discount-row{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 0;border-top:1px solid var(--line-soft)}
 .discount-row label{font-family:'Oswald',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;color:var(--muted)}
 .discount-row input{max-width:120px}
@@ -174,7 +182,8 @@ textarea{resize:vertical;min-height:80px}
 .print-items-table{width:100%;border-collapse:collapse;margin-bottom:20px}
 .print-items-table th{background:var(--accent-ink);color:#fff;font-family:'Oswald',sans-serif;font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;text-align:left}
 .print-items-table td{padding:10px 14px;border-bottom:1px solid var(--line-soft);font-size:.88rem}
-.print-items-table tr:nth-child(even) td{background:#f9f9f7}
+.print-items-table tr.alt td{background:#f9f9f7}
+.print-items-table tr.sub-row td{background:#fdfdfb;font-size:.8rem;color:var(--muted)}
 .print-totals{max-width:300px;margin-left:auto;margin-bottom:24px}
 .print-totals-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.9rem;border-bottom:1px solid var(--line-soft)}
 .print-totals-row.final{font-weight:700;font-size:1.05rem;background:var(--tint);padding:10px 14px;border-radius:6px;border:none;margin-top:6px}
@@ -190,7 +199,7 @@ textarea{resize:vertical;min-height:80px}
 select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236F6E68' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
 .overflow-x{overflow-x:auto}
 @media(max-width:900px){.builder-grid{grid-template-columns:1fr}.qpanel{position:static}.settings-layout{grid-template-columns:1fr}.settings-sidebar{display:flex;overflow-x:auto}.settings-sidebar button{border-bottom:none;border-right:1px solid var(--line-soft);white-space:nowrap}}
-@media(max-width:600px){#topbar{padding:0 12px}.nav-btn{padding:6px 10px;font-size:.78rem}#main{padding:16px 12px}.form-row{grid-template-columns:1fr}}
+@media(max-width:600px){#topbar{padding:0 12px}.nav-btn{padding:6px 10px;font-size:.78rem}#main{padding:16px 12px}.form-row{grid-template-columns:1fr}.line-mods{grid-template-columns:1fr 1fr}}
 @page{margin:0}
 @media print{
   *{scrollbar-width:none !important;-ms-overflow-style:none !important}
@@ -321,6 +330,14 @@ select{-webkit-appearance:none;appearance:none;background-image:url("data:image/
           <div class="form-row"><div class="form-group"><label>Tax Rate (%)</label><input type="number" id="s-tax" min="0" step="0.01"></div><div class="form-group"><label>Expiry Days</label><input type="number" id="s-expiry" min="1"></div></div>
           <div class="form-row"><div class="form-group"><label>Quote # Prefix</label><input type="text" id="s-prefix"></div><div class="form-group"><label>Next Quote #</label><input type="number" id="s-nextnum" min="1"></div></div>
           <div class="form-row"><div class="form-group"><label>Minimum Charge ($)</label><input type="number" id="s-mincharge" min="0" step="0.01"></div></div>
+          <h3 style="margin-top:28px">Line Modifiers</h3>
+          <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">Per-line surcharges for job difficulty, added as a % of the line amount. The first level is the default and normally 0%.</p>
+          <div class="form-row"><div class="form-group"><label>Hazard – Level 1 Name</label><input type="text" id="s-hz0-label"></div><div class="form-group"><label>Surcharge %</label><input type="number" id="s-hz0-pct" min="0" step="1"></div></div>
+          <div class="form-row"><div class="form-group"><label>Hazard – Level 2 Name</label><input type="text" id="s-hz1-label"></div><div class="form-group"><label>Surcharge %</label><input type="number" id="s-hz1-pct" min="0" step="1"></div></div>
+          <div class="form-row"><div class="form-group"><label>Hazard – Level 3 Name</label><input type="text" id="s-hz2-label"></div><div class="form-group"><label>Surcharge %</label><input type="number" id="s-hz2-pct" min="0" step="1"></div></div>
+          <div class="form-row"><div class="form-group"><label>Access – Level 1 Name</label><input type="text" id="s-ac0-label"></div><div class="form-group"><label>Surcharge %</label><input type="number" id="s-ac0-pct" min="0" step="1"></div></div>
+          <div class="form-row"><div class="form-group"><label>Access – Level 2 Name</label><input type="text" id="s-ac1-label"></div><div class="form-group"><label>Surcharge %</label><input type="number" id="s-ac1-pct" min="0" step="1"></div></div>
+          <div class="form-row"><div class="form-group"><label>Access – Level 3 Name</label><input type="text" id="s-ac2-label"></div><div class="form-group"><label>Surcharge %</label><input type="number" id="s-ac2-pct" min="0" step="1"></div></div>
           <div class="form-row"><div class="form-group form-full"><label>How to Pay (shown on quote)</label><textarea id="s-payment" rows="3"></textarea></div></div>
           <div class="form-row"><div class="form-group form-full"><label>Payment Terms</label><textarea id="s-terms" rows="5"></textarea></div></div>
           <div class="form-actions"><button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button></div>
@@ -424,8 +441,12 @@ const DEFAULT_SETTINGS = {
     {id:'removal_sm',name:'Tree Removal – Small',rate:300,unit:'tree',desc:'Under 30 ft'},
     {id:'removal_md',name:'Tree Removal – Medium',rate:600,unit:'tree',desc:'30–60 ft'},
     {id:'removal_lg',name:'Tree Removal – Large',rate:1200,unit:'tree',desc:'Over 60 ft'},
-    {id:'trimming',name:'Tree Trimming',rate:250,unit:'tree',desc:'Shape & maintain appearance'},
-    {id:'pruning',name:'Tree Pruning',rate:200,unit:'tree',desc:'Selective removal for health & structure'},
+    {id:'trimming_sm',name:'Tree Trimming – Small',rate:150,unit:'tree',desc:'Under 30 ft'},
+    {id:'trimming_md',name:'Tree Trimming – Medium',rate:350,unit:'tree',desc:'30–60 ft'},
+    {id:'trimming_lg',name:'Tree Trimming – Large',rate:700,unit:'tree',desc:'Over 60 ft'},
+    {id:'pruning_sm',name:'Tree Pruning – Small',rate:150,unit:'tree',desc:'Under 30 ft'},
+    {id:'pruning_md',name:'Tree Pruning – Medium',rate:350,unit:'tree',desc:'30–60 ft'},
+    {id:'pruning_lg',name:'Tree Pruning – Large',rate:700,unit:'tree',desc:'Over 60 ft'},
     {id:'stump',name:'Stump Grinding',rate:150,unit:'stump',desc:'Grind below grade'},
     {id:'debris',name:'Debris Removal & Transport',rate:125,unit:'load',desc:'Haul away branches & green waste'},
     {id:'lawn',name:'Lawn & Green Area Maintenance',rate:0.05,unit:'sqft',desc:'Mowing, cleaning & conservation',recurring:true},
@@ -439,7 +460,19 @@ const DEFAULT_SETTINGS = {
     {id:'emergency',name:'Emergency / Storm Response',rate:150,perUnit:false},
     {id:'fertilize',name:'Fertilization Treatment',rate:45,perUnit:false},
     {id:'pest',name:'Pest Control Treatment',rate:60,perUnit:false}
-  ]
+  ],
+  modifiers:{
+    hazard:[
+      {id:'none',label:'None',pct:0},
+      {id:'moderate',label:'Moderate',pct:25},
+      {id:'severe',label:'Severe',pct:50}
+    ],
+    access:[
+      {id:'easy',label:'Easy',pct:0},
+      {id:'tight',label:'Tight',pct:25},
+      {id:'crane',label:'Crane needed',pct:50}
+    ]
+  }
 };
 
 let CFG = {};
@@ -447,23 +480,58 @@ let QUOTES = [];
 let SESSION_UNLOCKED = false;
 let CURRENT_QUOTE_ID = null;
 
-let builderState = {
-  selected:{},
-  qtys:{},
-  visits:{},
-  addons:{},
-  discount:0
-};
+function freshBuilderState(discount){
+  return {selected:{},qtys:{},visits:{},addons:{},rates:{},hazard:{},access:{},discount:discount||0};
+}
+let builderState = freshBuilderState();
 
 function loadSettings(){
   const s = DB.get('cosmo_settings');
   CFG = s ? Object.assign({},DEFAULT_SETTINGS,s) : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
   if(!CFG.services) CFG.services = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.services));
   if(!CFG.addons) CFG.addons = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.addons));
+  if(s&&!s.modifiers) CFG.modifiers = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.modifiers));
+  migrateLegacyServices();
+}
+
+const LEGACY_SERVICES=[
+  {oldSvc:{id:'trimming',name:'Tree Trimming',rate:250,unit:'tree',desc:'Shape & maintain appearance'},newIds:['trimming_sm','trimming_md','trimming_lg'],remapTo:'trimming_md'},
+  {oldSvc:{id:'pruning',name:'Tree Pruning',rate:200,unit:'tree',desc:'Selective removal for health & structure'},newIds:['pruning_sm','pruning_md','pruning_lg'],remapTo:'pruning_md'}
+];
+
+// In-memory only (idempotent, runs every load): nothing is written to localStorage until the owner saves.
+// Splits single-rate trimming/pruning into S/M/L, but only if every field still matches the old default.
+function migrateLegacyServices(){
+  LEGACY_SERVICES.forEach(m=>{
+    const idx=CFG.services.findIndex(x=>x.id===m.oldSvc.id);
+    if(idx<0)return;
+    const cur=CFG.services[idx];
+    const untouched=['name','rate','unit','desc'].every(k=>cur[k]===m.oldSvc[k])&&!cur.recurring;
+    if(!untouched)return;
+    const repl=DEFAULT_SETTINGS.services.filter(x=>m.newIds.includes(x.id)).map(x=>JSON.parse(JSON.stringify(x)));
+    CFG.services.splice(idx,1,...repl);
+  });
+}
+
+// Point saved quote lines at the size-split ids so old quotes still open in the builder;
+// rateOverride keeps their original price. In-memory only — persisted whenever a quote is next saved.
+function remapLegacyQuoteLines(){
+  LEGACY_SERVICES.forEach(m=>{
+    if(CFG.services.find(x=>x.id===m.oldSvc.id))return;
+    if(!CFG.services.find(x=>x.id===m.remapTo))return;
+    QUOTES.forEach(q=>{
+      (q.lines||[]).forEach(l=>{
+        if(l.serviceId!==m.oldSvc.id)return;
+        l.serviceId=m.remapTo;
+        if(l.rateOverride==null)l.rateOverride=l.rate;
+      });
+      (q.addonLines||[]).forEach(a=>{if(a.serviceId===m.oldSvc.id)a.serviceId=m.remapTo});
+    });
+  });
 }
 
 function saveSettings(){DB.set('cosmo_settings',CFG)}
-function loadQuotes(){QUOTES=DB.get('cosmo_quotes')||[]}
+function loadQuotes(){QUOTES=DB.get('cosmo_quotes')||[];remapLegacyQuoteLines()}
 function saveQuotes(){DB.set('cosmo_quotes',QUOTES)}
 
 function todayISO(){const d=new Date();return d.toISOString().split('T')[0]}
@@ -538,7 +606,7 @@ function pinKey(k){
 
 function newQuote(){
   CURRENT_QUOTE_ID=null;
-  builderState={selected:{},qtys:{},visits:{},addons:{},discount:0};
+  builderState=freshBuilderState();
   document.getElementById('cl-name').value='';
   document.getElementById('cl-phone').value='';
   document.getElementById('cl-address').value='';
@@ -562,9 +630,7 @@ function renderServiceGrid(){
 function toggleService(id){
   if(builderState.selected[id]){
     delete builderState.selected[id];
-    delete builderState.qtys[id];
-    delete builderState.visits[id];
-    delete builderState.addons[id];
+    ['qtys','visits','addons','rates','hazard','access'].forEach(k=>delete builderState[k][id]);
   } else {
     builderState.selected[id]=true;
     builderState.qtys[id]=builderState.qtys[id]||0;
@@ -572,6 +638,45 @@ function toggleService(id){
     builderState.addons[id]=builderState.addons[id]||{};
   }
   renderServiceGrid();renderLineItems();renderQuotePanel();
+}
+
+function getModLevel(kind,id){
+  const list=(CFG.modifiers&&CFG.modifiers[kind])||[];
+  return list.find(m=>m.id===id)||list[0]||DEFAULT_SETTINGS.modifiers[kind][0];
+}
+
+function modOptions(kind,selectedId){
+  return ((CFG.modifiers&&CFG.modifiers[kind])||[]).map(m=>`<option value="${m.id}"${m.id===selectedId?' selected':''}>${m.label}${m.pct?` (+${m.pct}%)`:''}</option>`).join('');
+}
+
+// Single source of truth for per-line math (rate override + hazard/access surcharges).
+// Each amount is rounded to cents so the printed rows always sum exactly to the totals.
+function computeLine(s){
+  const round2=n=>Math.round(n*100)/100;
+  const qty=builderState.qtys[s.id]||0;
+  const visitsCalc=s.recurring?Math.max(1,builderState.visits[s.id]||1):1;
+  const ov=builderState.rates[s.id];
+  const rate=ov!=null?ov:s.rate;
+  const baseAmount=round2(qty*rate*visitsCalc);
+  const hz=getModLevel('hazard',builderState.hazard[s.id]);
+  const ac=getModLevel('access',builderState.access[s.id]);
+  const hazardAmt=round2(baseAmount*hz.pct/100);
+  const accessAmt=round2(baseAmount*ac.pct/100);
+  const line={
+    qty,visits:s.recurring?visitsCalc:0,rate,baseAmount,
+    hazardId:hz.id,hazardLabel:hz.label,hazardPct:hz.pct,hazardAmt,
+    accessId:ac.id,accessLabel:ac.label,accessPct:ac.pct,accessAmt,
+    amount:round2(baseAmount+hazardAmt+accessAmt)
+  };
+  if(ov!=null)line.rateOverride=ov;
+  return line;
+}
+
+function patchLineAmt(id){
+  const s=CFG.services.find(x=>x.id===id);
+  if(!s)return;
+  const amtEl=document.getElementById('line-amt-'+id);
+  if(amtEl) amtEl.textContent=fmt(computeLine(s).amount)+(s.recurring?'/mo':'');
 }
 
 function renderLineItems(){
@@ -584,9 +689,8 @@ function renderLineItems(){
   body.innerHTML=ids.map(id=>{
     const s=CFG.services.find(x=>x.id===id);
     if(!s)return'';
-    const qty=builderState.qtys[id]||0;
-    const visits=s.recurring?Math.max(1,builderState.visits[id]||1):1;
-    const amt=qty*s.rate*visits;
+    const c=computeLine(s);
+    const qty=c.qty;
     const svcAddons=builderState.addons[id]||{};
     const addonsHtml=CFG.addons.map(a=>{
       const checked=!!svcAddons[a.id];
@@ -603,10 +707,15 @@ function renderLineItems(){
       <div class="line-main">
         <div><div class="line-name">${s.name}</div><div class="line-desc">${s.desc}</div></div>
         <input type="number" class="qty-input" min="0" step="1" value="${qty||''}" placeholder="${s.unit}" oninput="updateQty('${id}',this.value)">
-        <span class="line-amt" id="line-amt-${id}">${fmt(amt)}${s.recurring?'/mo':''}</span>
+        <span class="line-amt" id="line-amt-${id}">${fmt(c.amount)}${s.recurring?'/mo':''}</span>
         <button class="line-remove" onclick="toggleService('${id}')" title="Remove">×</button>
       </div>
-      ${s.recurring?`<div class="line-freq"><label>Visits / month</label><input type="number" class="qty-input" min="1" step="1" value="${visits}" oninput="updateVisits('${id}',this.value)"><span class="freq-mo">billed monthly</span></div>`:''}
+      <div class="line-mods">
+        <div><label>Rate $/${s.unit}</label><input type="number" class="qty-input" min="0" step="0.01" value="${c.rate}" oninput="updateRate('${id}',this.value)"></div>
+        <div><label>Hazard</label><select onchange="updateLineMod('${id}','hazard',this.value)">${modOptions('hazard',c.hazardId)}</select></div>
+        <div><label>Access</label><select onchange="updateLineMod('${id}','access',this.value)">${modOptions('access',c.accessId)}</select></div>
+      </div>
+      ${s.recurring?`<div class="line-freq"><label>Visits / month</label><input type="number" class="qty-input" min="1" step="1" value="${c.visits}" oninput="updateVisits('${id}',this.value)"><span class="freq-mo">billed monthly</span></div>`:''}
       <div class="line-addons">
         <div class="line-addons-label">Add-ons for this service</div>
         <div class="line-addons-grid">${addonsHtml}</div>
@@ -618,12 +727,7 @@ function renderLineItems(){
 function updateQty(id,val){
   const qty=Math.max(0,parseFloat(val)||0);
   builderState.qtys[id]=qty;
-  const s=CFG.services.find(x=>x.id===id);
-  if(s){
-    const visits=s.recurring?Math.max(1,builderState.visits[id]||1):1;
-    const amtEl=document.getElementById('line-amt-'+id);
-    if(amtEl) amtEl.textContent=fmt(qty*s.rate*visits)+(s.recurring?'/mo':'');
-  }
+  patchLineAmt(id);
   const svcAddons=builderState.addons[id]||{};
   CFG.addons.forEach(a=>{
     if(!svcAddons[a.id])return;
@@ -634,14 +738,26 @@ function updateQty(id,val){
 }
 
 function updateVisits(id,val){
-  const visits=Math.max(1,parseInt(val)||1);
-  builderState.visits[id]=visits;
+  builderState.visits[id]=Math.max(1,parseInt(val)||1);
+  patchLineAmt(id);
+  renderQuotePanel();
+}
+
+function updateRate(id,val){
   const s=CFG.services.find(x=>x.id===id);
-  if(s){
-    const qty=builderState.qtys[id]||0;
-    const amtEl=document.getElementById('line-amt-'+id);
-    if(amtEl) amtEl.textContent=fmt(qty*s.rate*visits)+(s.recurring?'/mo':'');
-  }
+  if(!s)return;
+  // Blank/invalid means 0, like the qty field. Reverting to the configured rate drops the
+  // override so the line tracks future Settings changes.
+  const r=Math.max(0,parseFloat(val)||0);
+  if(r===s.rate) delete builderState.rates[id];
+  else builderState.rates[id]=r;
+  patchLineAmt(id);
+  renderQuotePanel();
+}
+
+function updateLineMod(id,kind,levelId){
+  builderState[kind][id]=levelId;
+  patchLineAmt(id);
   renderQuotePanel();
 }
 
@@ -664,9 +780,7 @@ function calcTotals(){
   const lines=Object.keys(builderState.selected).map(id=>{
     const s=CFG.services.find(x=>x.id===id);
     if(!s)return null;
-    const qty=builderState.qtys[id]||0;
-    const visits=s.recurring?Math.max(1,builderState.visits[id]||1):0;
-    return {serviceId:id,name:s.name,qty,unit:s.unit,rate:s.rate,recurring:!!s.recurring,visits,amount:qty*s.rate*(s.recurring?visits:1)};
+    return Object.assign({serviceId:id,name:s.name,unit:s.unit,recurring:!!s.recurring},computeLine(s));
   }).filter(Boolean);
 
   const addonLines=[];
@@ -704,10 +818,15 @@ function renderQuotePanel(){
   if(!lines.length&&!addonLines.length){
     linesEl.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:8px 0">No services selected</div>';
   } else {
+    const qpSub=(kind,label,pct,amt,rec)=>amt>0?`<div class="qp-line qp-sub"><div class="qp-lname">↳ ${kind} – ${label} (+${pct}%)</div><div class="qp-lamt">${fmt(amt)}${rec?'/mo':''}</div></div>`:'';
     linesEl.innerHTML=lines.map(l=>`
-      <div class="qp-line">
-        <div class="qp-lname">${l.name}<div class="qp-lsub">${l.qty.toLocaleString()} ${l.unit}${l.recurring?' × '+l.visits+'/mo':''}</div></div>
-        <div class="qp-lamt">${fmt(l.amount)}${l.recurring?'/mo':''}</div>
+      <div class="qp-group">
+        <div class="qp-line">
+          <div class="qp-lname">${l.name}<div class="qp-lsub">${l.qty.toLocaleString()} ${l.unit}${l.recurring?' × '+l.visits+'/mo':''}</div></div>
+          <div class="qp-lamt">${fmt(l.baseAmount)}${l.recurring?'/mo':''}</div>
+        </div>
+        ${qpSub('Hazard',l.hazardLabel,l.hazardPct,l.hazardAmt,l.recurring)}
+        ${qpSub('Access',l.accessLabel,l.accessPct,l.accessAmt,l.recurring)}
       </div>`).join('')+
       addonLines.map(a=>`
       <div class="qp-line qp-addon">
@@ -787,14 +906,24 @@ function saveQuoteToList(q){
 
 function loadQuoteIntoBuilder(q){
   CURRENT_QUOTE_ID=q.id;
-  builderState={selected:{},qtys:{},visits:{},addons:{},discount:q.discount||0};
-  q.lines.forEach(l=>{builderState.selected[l.serviceId]=true;builderState.qtys[l.serviceId]=l.qty;if(l.visits)builderState.visits[l.serviceId]=l.visits});
+  builderState=freshBuilderState(q.discount||0);
+  let dropped=false;
+  q.lines.forEach(l=>{
+    if(!CFG.services.find(x=>x.id===l.serviceId)){dropped=true;return}
+    builderState.selected[l.serviceId]=true;
+    builderState.qtys[l.serviceId]=l.qty;
+    if(l.visits)builderState.visits[l.serviceId]=l.visits;
+    if(l.rateOverride!=null)builderState.rates[l.serviceId]=l.rateOverride;
+    if(l.hazardId)builderState.hazard[l.serviceId]=l.hazardId;
+    if(l.accessId)builderState.access[l.serviceId]=l.accessId;
+  });
   (q.addonLines||[]).forEach(a=>{
-    if(a.serviceId){
+    if(a.serviceId&&builderState.selected[a.serviceId]){
       if(!builderState.addons[a.serviceId]) builderState.addons[a.serviceId]={};
       builderState.addons[a.serviceId][a.addonId]=true;
     }
   });
+  if(dropped) toast('Some services on this quote no longer exist — their lines and add-ons were removed. Review totals before saving.');
   document.getElementById('cl-name').value=q.client.name||'';
   document.getElementById('cl-phone').value=q.client.phone||'';
   document.getElementById('cl-address').value=q.client.address||'';
@@ -894,6 +1023,11 @@ function renderSettings(){
   document.getElementById('s-co-phone').value=c.phone||'';
   document.getElementById('s-co-email').value=c.email||'';
   document.getElementById('s-co-web').value=c.website||'';
+  renderDefaultsSettings();
+  renderServicesTable();renderAddonsTable();
+}
+
+function renderDefaultsSettings(){
   document.getElementById('s-tax').value=CFG.taxRate||0;
   document.getElementById('s-expiry').value=CFG.expiryDays||30;
   document.getElementById('s-prefix').value=CFG.quotePrefix||'CTS';
@@ -901,7 +1035,13 @@ function renderSettings(){
   document.getElementById('s-mincharge').value=CFG.minCharge||0;
   document.getElementById('s-payment').value=CFG.paymentDetails||'';
   document.getElementById('s-terms').value=CFG.terms||'';
-  renderServicesTable();renderAddonsTable();
+  [['hazard','hz'],['access','ac']].forEach(([kind,px])=>{
+    for(let i=0;i<3;i++){
+      const m=(CFG.modifiers&&CFG.modifiers[kind]&&CFG.modifiers[kind][i])||DEFAULT_SETTINGS.modifiers[kind][i];
+      document.getElementById(`s-${px}${i}-label`).value=m.label;
+      document.getElementById(`s-${px}${i}-pct`).value=m.pct;
+    }
+  });
 }
 
 function showSettingsTab(tab){
@@ -1024,7 +1164,7 @@ function saveEditModal(){
     } else {
       CFG.services.push({id:genId(),name,rate,unit,desc,recurring});
     }
-    saveSettings();renderServicesTable();renderServiceGrid();
+    saveSettings();renderServicesTable();renderServiceGrid();renderLineItems();renderQuotePanel();
   } else {
     const perUnit=document.getElementById('em-perunit').value==='1';
     if(id){
@@ -1033,7 +1173,7 @@ function saveEditModal(){
     } else {
       CFG.addons.push({id:genId(),name,rate,perUnit});
     }
-    saveSettings();renderAddonsTable();
+    saveSettings();renderAddonsTable();renderLineItems();renderQuotePanel();
   }
   closeEditModal();toast('Saved');
 }
@@ -1041,14 +1181,18 @@ function saveEditModal(){
 function deleteService(id){
   showConfirm('Delete this service?',()=>{
     CFG.services=CFG.services.filter(x=>x.id!==id);
-    saveSettings();renderServicesTable();renderServiceGrid();toast('Service deleted');
+    if(builderState.selected[id]){
+      delete builderState.selected[id];
+      ['qtys','visits','addons','rates','hazard','access'].forEach(k=>delete builderState[k][id]);
+    }
+    saveSettings();renderServicesTable();renderServiceGrid();renderLineItems();renderQuotePanel();toast('Service deleted');
   });
 }
 
 function deleteAddon(id){
   showConfirm('Delete this add-on?',()=>{
     CFG.addons=CFG.addons.filter(x=>x.id!==id);
-    saveSettings();renderAddonsTable();toast('Add-on deleted');
+    saveSettings();renderAddonsTable();renderLineItems();renderQuotePanel();toast('Add-on deleted');
   });
 }
 
@@ -1060,7 +1204,20 @@ function saveDefaultSettings(){
   CFG.minCharge=parseFloat(document.getElementById('s-mincharge').value)||0;
   CFG.paymentDetails=document.getElementById('s-payment').value;
   CFG.terms=document.getElementById('s-terms').value;
-  saveSettings();toast('Defaults saved');
+  // Blank label keeps the currently saved one (not the factory default)
+  const readMods=(px,kind)=>DEFAULT_SETTINGS.modifiers[kind].map((d,i)=>{
+    const cur=(CFG.modifiers&&CFG.modifiers[kind]&&CFG.modifiers[kind][i])||d;
+    return {
+      id:d.id,
+      label:document.getElementById(`s-${px}${i}-label`).value.trim()||cur.label,
+      pct:Math.max(0,parseFloat(document.getElementById(`s-${px}${i}-pct`).value)||0)
+    };
+  });
+  CFG.modifiers={hazard:readMods('hz','hazard'),access:readMods('ac','access')};
+  saveSettings();
+  renderDefaultsSettings();
+  renderLineItems();renderQuotePanel();
+  toast('Defaults saved');
 }
 
 function changePin(){
@@ -1076,8 +1233,17 @@ function changePin(){
 
 function buildPrintHtml(q){
   const co=CFG.company;
-  const linesHtml=q.lines.map(l=>`<tr><td>${l.name}${l.recurring?' (monthly service)':''}</td><td>${(l.qty||0).toLocaleString()} ${l.unit||''}${l.recurring?' × '+l.visits+'/mo':''}</td><td>${fmt(l.rate)}/${l.unit||'ea'}</td><td>${fmt(l.amount)}${l.recurring?'/mo':''}</td></tr>`).join('');
-  const addonHtml=q.addonLines.map(a=>`<tr><td>+ ${a.name}</td><td>${a.perUnit?(a.qty||0).toLocaleString()+' '+(a.unit||''):'—'}</td><td>${a.perUnit?fmt(a.rate)+'/'+(a.unit||'unit'):fmt(a.rate)+' flat'}</td><td>${fmt(a.amount)}</td></tr>`).join('');
+  let rowIdx=0;
+  const altCls=()=>rowIdx++%2?' class="alt"':'';
+  const printSub=(kind,label,pct,amt,rec)=>amt>0?`<tr class="sub-row"><td style="padding-left:26px">↳ ${kind} – ${label} (+${pct}%)</td><td></td><td></td><td>${fmt(amt)}${rec?'/mo':''}</td></tr>`:'';
+  const linesHtml=q.lines.map(l=>{
+    // Read only saved snapshot fields so history reprints stay as-saved; old quotes lack baseAmount
+    const base=l.baseAmount!=null?l.baseAmount:l.amount;
+    return `<tr${altCls()}><td>${l.name}${l.recurring?' (monthly service)':''}</td><td>${(l.qty||0).toLocaleString()} ${l.unit||''}${l.recurring?' × '+l.visits+'/mo':''}</td><td>${fmt(l.rate)}/${l.unit||'ea'}</td><td>${fmt(base)}${l.recurring?'/mo':''}</td></tr>`
+      +printSub('Hazard',l.hazardLabel,l.hazardPct,l.hazardAmt,l.recurring)
+      +printSub('Access',l.accessLabel,l.accessPct,l.accessAmt,l.recurring);
+  }).join('');
+  const addonHtml=q.addonLines.map(a=>`<tr${altCls()}><td>+ ${a.name}</td><td>${a.perUnit?(a.qty||0).toLocaleString()+' '+(a.unit||''):'—'}</td><td>${a.perUnit?fmt(a.rate)+'/'+(a.unit||'unit'):fmt(a.rate)+' flat'}</td><td>${fmt(a.amount)}</td></tr>`).join('');
   const discountRow=q.discount>0?`<div class="print-totals-row"><span>Discount</span><span>- ${fmt(q.discount)}</span></div>`:'';
   const taxRow=CFG.taxRate>0?`<div class="print-totals-row"><span>Tax (${CFG.taxRate}%)</span><span>${fmt(q.taxAmt)}</span></div>`:'';
 
