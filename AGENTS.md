@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 Single-page quote builder for Cosmo Tree Services. The entire app is one file: `index.html` — all HTML, CSS, and JavaScript inline. There is no build step, no framework, and no package manager. Keep it that way: make changes by editing `index.html` only, and do not add dependencies, build tooling, or new source files.
 
